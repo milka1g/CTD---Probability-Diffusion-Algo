@@ -2,7 +2,9 @@ import pandas as pd
 import random
 from ctd_pda import *
 from plotting import *
+from copy import deepcopy
 import os
+import dataframe_image as dfi
 #performance
 import timeit
 import tracemalloc
@@ -11,6 +13,7 @@ import tracemalloc
 ALPHA = 0.5
 STARTING_PROBABILITY = 0.5
 EXECUTIONS = 10
+ERROR = 1e-5
 
 class Performance:
     def __init__(self, filename="", memoryIter=0, memoryRec=0, timeIter=0, timeRec=0):
@@ -20,61 +23,91 @@ class Performance:
         self.timeIter = timeIter
         self.timeRec = timeRec
 
+    def to_dict(self):
+        return {
+            'filename': self.filename,
+            'Mem Iterative [KiB]': self.memoryIter/1024,
+            'Mem Recursive [KiB]': self.memoryRec/1024,
+            'Verdict Memory': "Iterative" if self.memoryIter < self.memoryRec else "Recursive",
+            'Time Iterative [s]': self.timeIter,
+            'Time Recursive [s]': self.timeRec,
+            'Verdict Time': "Iterative" if self.timeIter < self.timeRec else "Recursive",
+        }
+
+
+def exportResults(performanceData):
+    ROOT_DIR = os.path.dirname(os.path.abspath("tests.py"))
+    df = pd.DataFrame.from_records([s.to_dict() for s in performanceData])
+    dfi.export(df, f"{ROOT_DIR}/performanceResults.png")
+
+def compareResults(Giter, Grec):
+    errors = [abs(x-y) for x,y in zip(Giter, Grec)]
+    assert all(e < ERROR for e in errors)
+
 def test():
     performanceData = []
     ROOT_DIR = os.path.dirname(os.path.abspath("tests.py"))
     dest = f"{ROOT_DIR}/graphs"
     for filename in os.listdir(dest):
-        if "10" in filename:
-            performance = Performance()
-            performance.filename = filename
-            print(f"Graph: {filename}")
-            df = pd.read_csv(f"{dest}/{filename}")
-            df.columns = df.columns.astype(int)
+        performance = Performance()
+        performance.filename = filename
+        print(f"Graph: {filename}")
+        df = pd.read_csv(f"{dest}/{filename}")
+        df.columns = df.columns.astype(int)
 
-            size = len(df.columns)
-            sN = 0
-            startingProbability = STARTING_PROBABILITY
-            #sN = random.randint(0, size)
+        size = len(df.columns)
+        sN = 0
+        startingProbability = STARTING_PROBABILITY
+        #sN = random.randint(0, size)
 
-            Giter = { n : 0 for n in range(0,len(df.columns))}
-            Grec = {n: 0 for n in range(0, len(df.columns))}
+        Giter = { n : 0 for n in range(0,len(df.columns))}
+        Grec = {n: 0 for n in range(0, len(df.columns))}
 
-            Giter[sN] = startingProbability
-            Grec[sN] = startingProbability
+        Giter[sN] = startingProbability
+        Grec[sN] = startingProbability
 
-            vNiter = set()
-            vNiter.add(sN)
+        vNiter = set()
+        vNiter.add(sN)
 
-            vNrec = set()
-            vNrec.add(sN)
+        vNrec = set()
+        vNrec.add(sN)
 
-            tracemalloc.start()
-            DIFFUSE_PROBABILITY_RECURSIVE(sN, Grec, vNrec, df, p1=startingProbability, alpha=ALPHA)
-            _, peak = tracemalloc.get_traced_memory()
-            performance.memoryRec = peak
-            tracemalloc.stop()
-            elapsedTime = timeit.timeit(
-                    lambda: DIFFUSE_PROBABILITY_RECURSIVE(sN, Grec, vNrec, df, p1=startingProbability, alpha=ALPHA),
-                    number=EXECUTIONS)
-            performance.timeRec = elapsedTime / EXECUTIONS
+        tracemalloc.start()
+        DIFFUSE_PROBABILITY_RECURSIVE(sN, Grec, deepcopy(vNrec), df, p1=startingProbability, alpha=ALPHA)
+        print(f"G recursive: {Grec}")
+        _, peak = tracemalloc.get_traced_memory()
+        performance.memoryRec = peak
+        tracemalloc.stop()
 
-            tracemalloc.reset_peak()
+        tracemalloc.reset_peak()
 
-            tracemalloc.start()
-            DIFFUSE_PROBABILITY_ITERATIVE(sN, Giter, vNiter, df, p1=startingProbability, alpha=ALPHA)
-            _, peak = tracemalloc.get_traced_memory()
-            performance.memoryIter = peak
-            tracemalloc.stop()
-            elapsedTime = timeit.timeit(
-                lambda: DIFFUSE_PROBABILITY_ITERATIVE(sN, Grec, vNrec, df, p1=startingProbability, alpha=ALPHA),
+        tracemalloc.start()
+        DIFFUSE_PROBABILITY_ITERATIVE(sN, Giter, vNiter, df, p1=startingProbability, alpha=ALPHA)
+        print(f"G iterative: {Giter}")
+        _, peak = tracemalloc.get_traced_memory()
+        performance.memoryIter = peak
+        tracemalloc.stop()
+
+        compareResults(Giter, Grec)
+
+        Grec = {n: 0 for n in range(0, len(df.columns))}
+        Grec[sN] = startingProbability
+        elapsedTime = timeit.timeit(
+                stmt=lambda: DIFFUSE_PROBABILITY_RECURSIVE(sN, deepcopy(Grec), deepcopy(vNrec), df, p1=startingProbability, alpha=ALPHA),
                 number=EXECUTIONS)
-            performance.timeIter = elapsedTime / EXECUTIONS
+        performance.timeRec = elapsedTime / EXECUTIONS
 
-            performanceData.append(performance)
 
-            #print(f"G iterative: {Giter}")
-            #print(f"G recursive: {Grec}")
+        Giter = {n: 0 for n in range(0, len(df.columns))}
+        Giter[sN] = startingProbability
+        elapsedTime = timeit.timeit(
+            stmt=lambda: DIFFUSE_PROBABILITY_ITERATIVE(sN, deepcopy(Giter), deepcopy(vNiter), df, p1=startingProbability, alpha=ALPHA),
+            number=EXECUTIONS)
+        performance.timeIter = elapsedTime / EXECUTIONS
+
+        performanceData.append(performance)
+
+    exportResults(performanceData)
 
             # if "10" in filename:
             #     plotGraph(df, Giter, sN, startingProbability, f"Iterative: {filename}", filename)
