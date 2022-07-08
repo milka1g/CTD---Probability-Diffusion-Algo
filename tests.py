@@ -24,7 +24,8 @@ def test():
     vN = set()
     vN.add(sN)
     print(df)
-    DIFFUSE_PROBABILITY_RECURSIVE(sN, G, vN, df, p1=startingProbability)
+    #DIFFUSE_PROBABILITY_RECURSIVE(sN, G, vN, df, p1=startingProbability)
+    DIFFUSE_PROBABILITY_ITERATIVE(sN, G, vN, df, p1=startingProbability)
     print(G)
     suma = 0
     for node,prob in G.items():
