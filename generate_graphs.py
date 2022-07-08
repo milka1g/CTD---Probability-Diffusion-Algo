@@ -2,6 +2,7 @@ import networkx as nx
 import random
 import os
 
+
 def generate_random_graphs():
     ROOT_DIR = os.path.dirname(os.path.abspath("generate_graphs.py"))
     dest = f"{ROOT_DIR}/graphs"

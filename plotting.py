@@ -70,7 +70,7 @@ def plotGraph(df, Gprob, startingNode, startingProbability, text, filename):
             node_probabilities.append(startingProbability * 100)
         else:
             node_text.append(f'Node: {node} p: {probability}')
-            node_probabilities.append(probability * 300)
+            node_probabilities.append(probability * 100)
 
     #node_trace.marker.color = node_probabilities
     node_trace.text = node_text
@@ -91,10 +91,10 @@ def plotGraph(df, Gprob, startingNode, startingProbability, text, filename):
                     xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                     yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
                     )
-    #fig.show()
-    directory = os.path.dirname(os.path.abspath("plotting.py"))
-    dest = f"{directory}/plots"
-    fig.write_image(f"{dest}/{filename}.png")
+    fig.show()
+    # directory = os.path.dirname(os.path.abspath("plotting.py"))
+    # dest = f"{directory}/plots"
+    # fig.write_image(f"{dest}/{filename}.png")
 
 
 if __name__ == "__main__":
