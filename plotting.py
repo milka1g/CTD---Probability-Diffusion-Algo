@@ -9,7 +9,9 @@ def plotGraph(df, Gprob, startingNode, startingProbability, text):
 
     edge_x = []
     edge_y = []
-    weights = []
+    xtp = []
+    ytp = []
+    etext = []
     for edge in G.edges():
         x0, y0 = pos[edge[0]]
         x1, y1 = pos[edge[1]]
@@ -19,21 +21,16 @@ def plotGraph(df, Gprob, startingNode, startingProbability, text):
         edge_y.append(y0)
         edge_y.append(y1)
         edge_y.append(None)
-        weights.append(G[edge[0]][edge[1]]['weight'])
-
-    etext = [f'weight={w}' for w in weights]
-    xtp = []
-    ytp = []
-    for e in G.edges():
-        x0, y0 = pos[edge[0]]
-        x1, y1 = pos[edge[1]]
         xtp.append(0.5 * (x0 + x1))
         ytp.append(0.5 * (y0 + y1))
+        etext.append(f"{G[edge[0]][edge[1]]['weight']}")
 
-    trace3 = go.Scatter(x=xtp, y=ytp,
-                          mode='markers',
-                          marker=dict(color='rgb(125,125,125)', size=1),  # set the same color as for the edge lines
-                          text=etext, hoverinfo='text')
+
+    eweights_trace = go.Scatter(x=xtp, y=ytp, mode='text',
+                                marker_size=0.5,
+                                text=etext,
+                                textposition='top center',
+                                hovertemplate='weight: %{text}<extra></extra>')
 
     edge_trace = go.Scatter(
         x=edge_x, y=edge_y,
@@ -80,9 +77,9 @@ def plotGraph(df, Gprob, startingNode, startingProbability, text):
     node_trace.text = node_text
     node_trace.marker.size = node_probabilities
 
-    fig = go.Figure(data=[edge_trace, node_trace, trace3],
+    fig = go.Figure(data=[edge_trace, node_trace, eweights_trace],
                  layout=go.Layout(
-                    title=f'{text} blabla',
+                    title=f'<br> {text} blabla',
                     titlefont_size=16,
                     showlegend=False,
                     hovermode='closest',

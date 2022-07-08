@@ -20,12 +20,17 @@ def test():
     #sN = random.randint(0, size)
     G = { n : 0 for n in range(0,len(df.columns))}
     startingProbability = 0.5
+    G[sN] = startingProbability;
     vN = set()
     vN.add(sN)
     print(df)
     DIFFUSE_PROBABILITY_RECURSIVE(sN, G, vN, df, p1=startingProbability)
-    print(G)  #HOW TO TEST IF THIS IS ANY GOOD?!?!?!?!?!?! TODO
-    plotGraph(df, G, sN, startingProbability, "text")
+    print(G)
+    suma = 0
+    for node,prob in G.items():
+        suma += prob
+    print("sum:", suma)
+    #plotGraph(df, G, sN, startingProbability, "nameoffilemaybe")
 
 
 if __name__ == "__main__":
