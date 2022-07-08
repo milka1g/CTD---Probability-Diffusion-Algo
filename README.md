@@ -1,4 +1,4 @@
-##ETF (School of Electrical Engineering) - Master Academic Studies - Computational Genomics (13M111GI) 
+## ETF (School of Electrical Engineering) - Master Academic Studies - Computational Genomics (13M111GI) 
 
 
 Implementation of a Probability Diffusion Algorithm from [CTD: An information-theoretic algorithm to interpret sets of metabolomic
