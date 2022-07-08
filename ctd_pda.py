@@ -7,9 +7,9 @@
 """
 :param p1: [float]–probability to be divided across network nodes
 :param tresholdDiff: [float]–probability threshold at which diffusion truncates
-:param sn: [string]–the node name of an initial starting node // index
+:param sn startingNode: [string]–the node name of an initial starting node // index
 :param G: [hash]–node names are KEYS, node probabilities are VALUES //{int-float}
-:param vN: [vector]–visited nodes, a subset of node names (KEYS) in G //[list]
+:param vN visitedNodes: [vector]–visited nodes, a subset of node names (KEYS) in G //[list]
 :param adj_mat: [matrix]–the weighted adjacency matrix of the network //pd
 """
 from queue import LifoQueue
