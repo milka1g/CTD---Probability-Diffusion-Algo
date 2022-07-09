@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+/plotsHtml
 
 # C extensions
 *.so
@@ -10,7 +11,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 .idea
-.html
+*.html
 build/
 develop-eggs/
 dist/
