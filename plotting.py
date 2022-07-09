@@ -25,7 +25,6 @@ def plotGraph(df, Gprob, startingNode, startingProbability, text, filename):
         ytp.append(0.5 * (y0 + y1))
         etext.append(f"{G[edge[0]][edge[1]]['weight']}")
 
-
     eweights_trace = go.Scatter(x=xtp, y=ytp, mode='text',
                                 marker_size=0.5,
                                 text=etext,
@@ -38,13 +37,13 @@ def plotGraph(df, Gprob, startingNode, startingProbability, text, filename):
         hoverinfo='text',
         mode='lines')
 
-
     node_x = []
     node_y = []
     for node in G.nodes():
         x, y = pos[node]
         node_x.append(x)
         node_y.append(y)
+
 
     node_trace = go.Scatter(
         x=node_x, y=node_y,
@@ -64,7 +63,9 @@ def plotGraph(df, Gprob, startingNode, startingProbability, text, filename):
 
     node_probabilities = []
     node_text = []
+    labels = []
     for node, probability in Gprob.items():
+        labels.append(f"<b>{node}</b>")
         if (node == startingNode):
             node_text.append(f'Starting node: {node} p: {startingProbability}')
             node_probabilities.append(startingProbability * 100)
@@ -76,7 +77,14 @@ def plotGraph(df, Gprob, startingNode, startingProbability, text, filename):
     node_trace.text = node_text
     node_trace.marker.size = node_probabilities
 
-    fig = go.Figure(data=[edge_trace, node_trace, eweights_trace],
+    node_labels = go.Scatter(
+        x=node_x, y=node_y,
+        mode="text",
+        marker_size=0.8,
+        text=labels
+    )
+
+    fig = go.Figure(data=[edge_trace, node_trace, eweights_trace, node_labels],
                  layout=go.Layout(
                     title=f'{text} ',
                     titlefont_size=16,
@@ -91,10 +99,10 @@ def plotGraph(df, Gprob, startingNode, startingProbability, text, filename):
                     xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
                     yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
                     )
-    fig.show()
-    # directory = os.path.dirname(os.path.abspath("plotting.py"))
-    # dest = f"{directory}/plots"
-    # fig.write_image(f"{dest}/{filename}.png")
+    #fig.show()
+    directory = os.path.dirname(os.path.abspath("plotting.py"))
+    dest = f"{directory}/plotsHtml"
+    fig.write_html(f"{dest}/{filename}.html")
 
 
 if __name__ == "__main__":

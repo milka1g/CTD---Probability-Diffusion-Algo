@@ -64,7 +64,3 @@ def DIFFUSE_PROBABILITY_ITERATIVE(startingNode, G, visitedNodes, adj_mat, tresho
         else:
             for un in unvisitedNodes:
                 G[un] = G[un] + p1 / len(unvisitedNodes)
-
-
-if __name__ == "__main__":
-    DIFFUSE_PROBABILITY_ITERATIVE()

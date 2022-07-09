@@ -38,80 +38,88 @@ class Performance:
 def exportResults(performanceData):
     ROOT_DIR = os.path.dirname(os.path.abspath("tests.py"))
     df = pd.DataFrame.from_records([s.to_dict() for s in performanceData])
-    dfi.export(df, f"{ROOT_DIR}/performanceResults.png")
+    dfi.export(df, f"{ROOT_DIR}/performanceResults_A_{ALPHA}.png")
 
 def compareResults(Giter, Grec):
     errors = [abs(x-y) for x,y in zip(Giter, Grec)]
     assert all(e < ERROR for e in errors)
+
+def Gsum(G):
+    sum = 0.0
+    for node, prob in G.items():
+        sum += prob
+    print("G sum: ", sum)
 
 def test():
     performanceData = []
     ROOT_DIR = os.path.dirname(os.path.abspath("tests.py"))
     dest = f"{ROOT_DIR}/graphs"
     for filename in os.listdir(dest):
-        performance = Performance()
-        performance.filename = filename
-        print(f"Graph: {filename}")
-        df = pd.read_csv(f"{dest}/{filename}")
-        df.columns = df.columns.astype(int)
+        if "10" in filename:
+            performance = Performance()
+            performance.filename = filename
+            print(f"Graph: {filename}")
+            df = pd.read_csv(f"{dest}/{filename}")
+            df.columns = df.columns.astype(int)
 
-        size = len(df.columns)
-        sN = 0
-        startingProbability = STARTING_PROBABILITY
-        #sN = random.randint(0, size)
+            size = len(df.columns)
+            sN = 0
+            startingProbability = STARTING_PROBABILITY
+            #sN = random.randint(0, size)
 
-        Giter = { n : 0 for n in range(0,len(df.columns))}
-        Grec = {n: 0 for n in range(0, len(df.columns))}
+            Giter = { n : 0 for n in range(0, len(df.columns))}
+            Grec = { n : 0 for n in range(0, len(df.columns))}
 
-        Giter[sN] = startingProbability
-        Grec[sN] = startingProbability
+            Giter[sN] = startingProbability
+            Grec[sN] = startingProbability
 
-        vNiter = set()
-        vNiter.add(sN)
+            vNiter = set()
+            vNiter.add(sN)
 
-        vNrec = set()
-        vNrec.add(sN)
+            vNrec = set()
+            vNrec.add(sN)
 
-        tracemalloc.start()
-        DIFFUSE_PROBABILITY_RECURSIVE(sN, Grec, deepcopy(vNrec), df, p1=startingProbability, alpha=ALPHA)
-        print(f"G recursive: {Grec}")
-        _, peak = tracemalloc.get_traced_memory()
-        performance.memoryRec = peak
-        tracemalloc.stop()
+            tracemalloc.start()
+            DIFFUSE_PROBABILITY_RECURSIVE(sN, Grec, deepcopy(vNrec), df, p1=startingProbability, alpha=ALPHA)
+            print(f"G recursive: {Grec}")
+            Gsum(Grec)
+            plotGraph(df, Grec, sN, startingProbability, f"Iterative: {filename}", filename)
+            _, peak = tracemalloc.get_traced_memory()
+            performance.memoryRec = peak
+            tracemalloc.stop()
 
-        tracemalloc.reset_peak()
+            tracemalloc.reset_peak()
 
-        tracemalloc.start()
-        DIFFUSE_PROBABILITY_ITERATIVE(sN, Giter, vNiter, df, p1=startingProbability, alpha=ALPHA)
-        print(f"G iterative: {Giter}")
-        _, peak = tracemalloc.get_traced_memory()
-        performance.memoryIter = peak
-        tracemalloc.stop()
+            tracemalloc.start()
+            DIFFUSE_PROBABILITY_ITERATIVE(sN, Giter, deepcopy(vNiter), df, p1=startingProbability, alpha=ALPHA)
+            print(f"G iterative: {Giter}")
+            Gsum(Giter)
+            plotGraph(df, Giter, sN, startingProbability, f"Iterative: {filename}", filename)
+            _, peak = tracemalloc.get_traced_memory()
+            performance.memoryIter = peak
+            tracemalloc.stop()
 
-        compareResults(Giter, Grec)
+            compareResults(Giter, Grec)
 
-        Grec = {n: 0 for n in range(0, len(df.columns))}
-        Grec[sN] = startingProbability
-        elapsedTime = timeit.timeit(
-                stmt=lambda: DIFFUSE_PROBABILITY_RECURSIVE(sN, deepcopy(Grec), deepcopy(vNrec), df, p1=startingProbability, alpha=ALPHA),
+            Grec = {n: 0 for n in range(0, len(df.columns))}
+            Grec[sN] = startingProbability
+            elapsedTime = timeit.timeit(
+                    stmt=lambda: DIFFUSE_PROBABILITY_RECURSIVE(sN, deepcopy(Grec), deepcopy(vNrec), df, p1=startingProbability, alpha=ALPHA),
+                    number=EXECUTIONS)
+            performance.timeRec = elapsedTime / EXECUTIONS
+
+
+            Giter = {n: 0 for n in range(0, len(df.columns))}
+            Giter[sN] = startingProbability
+            elapsedTime = timeit.timeit(
+                stmt=lambda: DIFFUSE_PROBABILITY_ITERATIVE(sN, deepcopy(Giter), deepcopy(vNiter), df, p1=startingProbability, alpha=ALPHA),
                 number=EXECUTIONS)
-        performance.timeRec = elapsedTime / EXECUTIONS
+            performance.timeIter = elapsedTime / EXECUTIONS
 
-
-        Giter = {n: 0 for n in range(0, len(df.columns))}
-        Giter[sN] = startingProbability
-        elapsedTime = timeit.timeit(
-            stmt=lambda: DIFFUSE_PROBABILITY_ITERATIVE(sN, deepcopy(Giter), deepcopy(vNiter), df, p1=startingProbability, alpha=ALPHA),
-            number=EXECUTIONS)
-        performance.timeIter = elapsedTime / EXECUTIONS
-
-        performanceData.append(performance)
+            performanceData.append(performance)
 
     exportResults(performanceData)
 
-            # if "10" in filename:
-            #     plotGraph(df, Giter, sN, startingProbability, f"Iterative: {filename}", filename)
-            #     plotGraph(df, Grec, sN, startingProbability, f"Recursive {filename}", filename)
 
 if __name__ == "__main__":
     test()
