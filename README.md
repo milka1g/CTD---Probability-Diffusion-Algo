@@ -5,7 +5,7 @@
 Implementation of a Probability Diffusion Algorithm (PDA) from [CTD: An information-theoretic algorithm to interpret sets of metabolomic
 and transcriptomic perturbations in the context of graphical models](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008550) (Table 2.)
 
-🧬 <details>
+<details>
    <summary> Requirements (Serbian)</summary>
 Smatrati da je matrica susednosti data na ulazu kao Padas dataframe koji se učitava iz csv fajla i da je u pitanju matrica susednosti neusmerenog težinskog grafa.  Algoritam implementirati rekurzivno (kao što je opisano u radu) i iterativno i porediti performanse u pogledu vremena izvršavanja i memorijskog zauzeća.
 Trenutno se u algoritmu za difuziju ½ verovatnoće rasipa na susede, a ½ ostaje u čvoru (linije 8, 9, 10 i 11 pseudokoda u navedenom radu). Proširiti algoritam tako da implementirana funkcija prima parametar alfa koji određuje koji se procenat verovatnoće prenosi na susede, npr. ako je alfa = 0.7, prenosi se 70% verovatnoće, a 30% ostaje u čvoru. 
