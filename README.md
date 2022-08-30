@@ -1,4 +1,4 @@
-### ETF (School of Electrical Engineering) - Master Academic Studies - * Computational Genomics (13M111GI) *
+### ETF (School of Electrical Engineering) - Master Academic Studies -  Computational Genomics (13M111GI) 
 
 ####  Objective
 
